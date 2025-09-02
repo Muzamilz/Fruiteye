@@ -1,0 +1,86 @@
+# XAMPP SSL Configuration Guide for Fruit Disease Detection App
+
+## Step 1: Enable SSL Module in Apache
+1. Open XAMPP Control Panel
+2. Click "Config" next to Apache
+3. Select "httpd.conf"
+4. Find and uncomment this line (remove the #):
+   #Include conf/extra/httpd-ssl.conf
+   Should become:
+   Include conf/extra/httpd-ssl.conf
+
+5. Also uncomment:
+   #LoadModule ssl_module modules/mod_ssl.so
+   Should become:
+   LoadModule ssl_module modules/mod_ssl.so
+
+## Step 2: Update httpd-ssl.conf Configuration
+Replace the VirtualHost section in your httpd-ssl.conf with this:
+
+<VirtualHost _default_:443>
+    # General setup for the virtual host
+    DocumentRoot "C:/xampp/htdocs"
+    ServerName localhost:443
+    ServerAdmin admin@fruiteye.local
+    ErrorLog "C:/xampp/apache/logs/ssl_error.log"
+    TransferLog "C:/xampp/apache/logs/ssl_access.log"
+
+    # SSL Engine Switch
+    SSLEngine on
+
+    # SSL Protocol support
+    SSLProtocol all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1
+    SSLCipherSuite ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384
+    SSLHonorCipherOrder on
+
+    # Certificate files (use XAMPP default or custom)
+    SSLCertificateFile "conf/ssl.crt/server.crt"
+    SSLCertificateKeyFile "conf/ssl.key/server.key"
+
+    # Security headers
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-Frame-Options DENY
+    Header always set X-XSS-Protection "1; mode=block"
+
+    # PHP SSL environment variables
+    <FilesMatch "\.(cgi|shtml|phtml|php)$">
+        SSLOptions +StdEnvVars
+    </FilesMatch>
+    
+    # Custom log format for SSL
+    CustomLog "C:/xampp/apache/logs/ssl_request.log" \
+              "%t %h %{SSL_PROTOCOL}x %{SSL_CIPHER}x \"%r\" %b"
+</VirtualHost>
+
+## Step 3: Generate SSL Certificate (if needed)
+If you don't have SSL certificates, use the ssl_setup.php script:
+1. Visit: http://localhost/fruiteye/ssl_setup.php
+2. Click "إنشاء شهادة تطوير"
+3. Copy generated certificates to:
+   - Certificate: C:/xampp/apache/conf/ssl.crt/server.crt
+   - Private Key: C:/xampp/apache/conf/ssl.key/server.key
+
+## Step 4: Restart Apache
+1. Stop Apache in XAMPP Control Panel
+2. Start Apache again
+3. Check that both HTTP (80) and HTTPS (443) ports are running
+
+## Step 5: Test Configuration
+1. Visit: https://localhost/fruiteye
+2. Accept the self-signed certificate warning (for development)
+3. Verify the application loads over HTTPS
+4. Check that HTTP redirects to HTTPS automatically
+
+## Troubleshooting
+- If Apache won't start, check error logs in C:/xampp/apache/logs/
+- Ensure no other applications are using port 443
+- Verify certificate files exist and have correct permissions
+- Check Windows Firewall settings for port 443
+
+## Production Notes
+For production deployment:
+- Use valid SSL certificates from a trusted CA
+- Update ServerName to your actual domain
+- Configure proper DNS settings
+- Enable OCSP stapling for better performance

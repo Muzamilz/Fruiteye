@@ -1,0 +1,17 @@
+{
+    "name": "fruiteye/fruit-analysis",
+    "description": "Fruit Disease Detection System",
+    "type": "project",
+    "require": {
+        "php": ">=7.4",
+        "firebase/php-jwt": "^6.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "FruitEye\\": "src/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true
+    }
+}
